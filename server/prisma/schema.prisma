@@ -1,0 +1,78 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     String[]
+  rubrics   Rubric[]
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Rubric {
+  createdAt      DateTime        @default(now())
+  criteriaGroups CriteriaGroup[]
+  id             String          @id @default(cuid())
+  marksBands     MarksBand[]
+  owner          User            @relation(fields: [ownerId], references: [id])
+  ownerId        String
+  sections       Section[]
+  updatedAt      DateTime        @updatedAt
+}
+
+model Section {
+  createdAt DateTime    @default(now())
+  criteria  Criterion[]
+  id        String      @id @default(cuid())
+  name      String
+  rubric    Rubric      @relation(fields: [rubricId], references: [id])
+  rubricId  String
+  updatedAt DateTime    @updatedAt
+}
+
+model CriteriaGroup {
+  createdAt  DateTime    @default(now())
+  id         String      @id @default(cuid())
+  marksBands MarksBand[]
+  name       String
+  rubric     Rubric      @relation(fields: [rubricId], references: [id])
+  rubricId   String
+  updatedAt  DateTime    @updatedAt
+}
+
+model MarksBand {
+  bottom          Float
+  createdAt       DateTime      @default(now())
+  criteria        Criterion[]
+  criteriaGroup   CriteriaGroup @relation(fields: [criteriaGroupId], references: [id])
+  criteriaGroupId String
+  id              String        @id @default(cuid())
+  name            String
+  rubric          Rubric        @relation(fields: [rubricId], references: [id])
+  rubricId        String
+  top             Float
+  updatedAt       DateTime      @updatedAt
+}
+
+model Criterion {
+  advice      String?
+  createdAt   DateTime  @default(now())
+  id          String    @id @default(cuid())
+  marksBand   MarksBand @relation(fields: [marksBandId], references: [id])
+  marksBandId String
+  order       Int
+  section     Section   @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  text        String
+  updatedAt   DateTime  @updatedAt
+}
